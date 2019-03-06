@@ -9,9 +9,10 @@ namespace POELiveSplitComponent.Component
 {
     class ClientParser
     {
-        private static readonly Regex START = new Regex(@"^[^ ]+ [^ ]+ (\d+).*Got Instance Details");
-
-        private static readonly Regex ZONE_NAME = new Regex(@"^[^ ]+ [^ ]+ (\d+).*You have entered (.*)\.$");
+        // Example level up log entry:
+        // 2017/06/09 21:43:04 697150734 951 [INFO Client 3308] : OldBenKenobiznutz (Templar) is now level 2
+        private static readonly Regex LEVEL_UP = new Regex(@"^[^ ]+ [^ ]+ (\d+).*is now level (\d+)");
+        //new Regex(@"^(.*)?is now level (\d+)");
 
         private LoadRemoverSplitter splitter;
 
@@ -22,18 +23,11 @@ namespace POELiveSplitComponent.Component
 
         public void ProcessLine(string s)
         {
-            Match match = START.Match(s);
+            Match match = LEVEL_UP.Match(s);
             if (match.Success)
             {
                 GroupCollection groups = match.Groups;
-                splitter.HandleLoadStart(long.Parse(groups[1].Value));
-                return;
-            }
-            match = ZONE_NAME.Match(s);
-            if (match.Success)
-            {
-                GroupCollection groups = match.Groups;
-                splitter.HandleLoadEnd(long.Parse(groups[1].Value), groups[2].Value);
+                splitter.HandleLevelUp(Int32.Parse(groups[1].Value));
             }
         }
     }

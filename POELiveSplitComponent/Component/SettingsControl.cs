@@ -24,36 +24,18 @@ namespace POELiveSplitComponent.Component
             this.settings = settings;
             this.state = state;
             InitializeComponent();
-            foreach (Zone zone in Zone.ZONES)
-            {
-                checkedListZones.Items.Add(zone, false);
-            }
             XmlRefresh();
         }
 
         public void XmlRefresh()
         {
             checkAutoSplit.Checked = settings.AutoSplitEnabled;
-            checkLoadRemoval.Checked = settings.LoadRemovalEnabled;
             textLogLocation.Text = settings.LogLocation;
-            checkLabyrinth.Checked = settings.LabSpeedrunningEnabled;
-
-            for (int i = 0; i < checkedListZones.Items.Count; i++)
-            {
-                Zone zone = (Zone)checkedListZones.Items[i];
-                bool shouldSplit = settings.SplitZones.Contains(zone);
-                checkedListZones.SetItemChecked(i, shouldSplit);
-            }
         }
 
         private void HandleAutoSplitChanged(object sender, EventArgs e)
         {
             settings.AutoSplitEnabled = checkAutoSplit.Checked;
-        }
-
-        private void handleLoadRemovalChanged(object sender, EventArgs e)
-        {
-            settings.LoadRemovalEnabled = checkLoadRemoval.Checked;
         }
 
         private void handleLogLocationChanged(object sender, EventArgs e)
@@ -89,33 +71,6 @@ namespace POELiveSplitComponent.Component
             Process.Start("https://github.com/brandondong/POE-LiveSplit-Component/blob/master/README.md");
         }
 
-        private void HandleItemChecked(object sender, ItemCheckEventArgs e)
-        {
-            Zone zone = (Zone)checkedListZones.Items[e.Index];
-            if (e.NewValue == CheckState.Checked)
-            {
-                settings.SplitZones.Add(zone);
-            }
-            else
-            {
-                settings.SplitZones.Remove(zone);
-            }
-        }
-
-        private void HandleCheckLabyrinth(object sender, EventArgs e)
-        {
-            settings.LabSpeedrunningEnabled = checkLabyrinth.Checked;
-            checkAutoSplit.Enabled = !checkLabyrinth.Checked;
-        }
-
-        private void HandleSelectAll(object sender, EventArgs e)
-        {
-            for (int i = 0; i < checkedListZones.Items.Count; i++)
-            {
-                checkedListZones.SetItemChecked(i, checkSelectAll.Checked);
-            }
-        }
-
         private void HandleGenerateSplits(object sender, EventArgs e)
         {
             if (state.CurrentPhase != TimerPhase.NotRunning)
@@ -130,20 +85,14 @@ namespace POELiveSplitComponent.Component
                 return;
             }
             state.Run.Clear();
-            for (int i = 0; i < checkedListZones.Items.Count; i++)
+            for (int i = 2; i <= 100; i++)
             {
-                if (checkedListZones.GetItemChecked(i))
-                {
-                    state.Run.AddSegment(checkedListZones.Items[i].ToString());
-                }
-            }
-            if (state.Run.Count == 0)
-            {
-                state.Run.AddSegment("");
+                state.Run.AddSegment($"Level {i}");
             }
             state.Form.Invalidate();
             MessageBox.Show("Splits generated successfully.\n\nDue to LiveSplit API restrictions, the Splits Editor needs to be reopened to view the updated changes.",
                 "Generate Splits", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
     }
 }
